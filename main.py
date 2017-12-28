@@ -9,6 +9,7 @@ from pygame.locals import *
 import os
 from time import sleep
 import screens
+import gui.camera_sprite
 
 # Init framebuffer/touchscreen environment variables
 os.putenv('SDL_VIDEODRIVER', 'fbcon')
@@ -36,7 +37,7 @@ screen = screens.TestScreen()
 while True:
 
     # Refresh display
-
+    gui.camera_sprite.has_updated = False
     screen.update()
     screen.draw(displaySurface)
 

@@ -51,4 +51,3 @@ class CameraSprite(pygame.sprite.Sprite):
     def update(self, *args):
         update_camsprite()
         self.image = camera_preview
-        self.rect.size = camera_preview.get_rect().size

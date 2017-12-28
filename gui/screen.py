@@ -1,9 +1,10 @@
 import pygame
+import gui
 
 
 class Screen:
     def __init__(self):
-        self.group = pygame.sprite.RenderPlain()
+        self.group = gui.PGroup()
 
     def update(self):
         self.group.update()
