@@ -1,53 +1,47 @@
+import math
 import io
 import pygame
-import yuv2rgb
+import numpy
 import common_camera
+from vec import vec
 
 
-def camera_pixels() -> int:
-    return common_camera.camera.resolution.width * common_camera.camera.resolution.height
-
-
-# Buffers for viewfinder data
-rgb = bytearray(camera_pixels() * 3)
-yuv = bytearray((camera_pixels() * 3) // 2)
-
-camera_preview = pygame.Surface(common_camera.camera.resolution)
-camera_preview.fill((255, 0, 255))
+output = numpy.empty((1,))
+camera_preview = pygame.Surface((1, 1))
 
 has_updated = False
 
 
+def raw_size() -> vec:
+    return vec(32 * math.ceil(common_camera.resolution.x/32), 16 * math.ceil(common_camera.resolution.y/16))
+
+
 def update_camsprite():
-    global rgb, yuv, camera_preview, has_updated
+    global output, camera_preview, has_updated
     if has_updated:
         return
 
-    if len(rgb) != camera_pixels() * 3:
-        rgb = bytearray(camera_pixels() * 3)
-        yuv = bytearray((camera_pixels() * 3) // 2)
+    common_camera.preview()
+    size = raw_size()
 
-    size = common_camera.camera.resolution
+    if output.shape[0] != int(size.y) or output.shape[1] != int(size.x):
+        output = numpy.empty((int(size.y), int(size.x), 3), dtype=numpy.uint8)
+        camera_preview = pygame.Surface((int(size.x), int(size.y)))
 
-    stream = io.BytesIO()  # Capture into in-memory stream
-    common_camera.camera.capture(stream, use_video_port=True, format='raw')
-    stream.seek(0)
-    stream.readinto(yuv)  # stream -> YUV buffer
-    stream.close()
-    yuv2rgb.convert(yuv, rgb, size.width, size.height)
-
-    camera_preview = pygame.image.frombuffer(rgb[0: (size.width * size.height * 3)], size, 'RGB')
+    common_camera.camera.capture(output, use_video_port=True, format='rgb')
+    pygame.surfarray.blit_array(camera_preview, output.swapaxes(0, 1))
 
     has_updated = True
 
 
-class CameraSprite(pygame.sprite.Sprite):
+class CameraSprite(pygame.sprite.DirtySprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.Surface(common_camera.camera.resolution)
+        self.image = pygame.Surface(common_camera.resolution)
         self.image.fill((255, 0, 255))
         self.rect = self.image.get_rect()
 
     def update(self, *args):
         update_camsprite()
+        self.dirty = 1
         self.image = camera_preview

@@ -5,6 +5,9 @@
     <orderEntry type="jdk" jdkName="Remote Python 3.4.2 (sftp://pi@raspberrypi.local:22/home/pi/python_sudo)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
+  <component name="PyDocumentationSettings">
+    <option name="renderExternalDocumentation" value="true" />
+  </component>
   <component name="TestRunnerService">
     <option name="PROJECT_TEST_RUNNER" value="Unittests" />
   </component>
